@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BenefitResource;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class BenefitController extends Controller
@@ -21,7 +20,6 @@ class BenefitController extends Controller
 
         $dataSheet = Http::get('https://run.mocky.io/v3/c7a4777f-e383-4122-8a89-70f29a6830c0');
         $dataSheetData = $dataSheet->json();
-        //
 
         $filters = collect($filtersData['data'])->keyBy('id_programa');
         $dataSheets = collect($dataSheetData['data'])->keyBy('id');
@@ -50,53 +48,5 @@ class BenefitController extends Controller
         })->values();
 
         return BenefitResource::collection($benefitsByYear);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
