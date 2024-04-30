@@ -14,19 +14,30 @@ class BenefitController extends Controller
     public function index()
     {
         $benefitsResponse = Http::get('https://run.mocky.io/v3/399b4ce1-5f6e-4983-a9e8-e3fa39e1ea71');
-        $data = $benefitsResponse->json();
+        $benefitsData = $benefitsResponse->json();
 
-        $benefitsByYear = collect($data['data'])->groupBy(function ($item) {
+        $filtersResponse = Http::get('https://run.mocky.io/v3/06b8dd68-7d6d-4857-85ff-b58e204acbf4');
+        $filtersData = $filtersResponse->json();
+
+        $filters = collect($filtersData['data'])->keyBy('id_programa');
+        //dd($filters); // 147 - 146 - 130
+
+        $benefitsByYear = collect($benefitsData['data'])->groupBy(function ($item) {
             return substr($item['fecha'], 0, 4);
-        })->map(function ($item, $key) {
-            $total_anio = $item->sum('monto');
-            return [
-                'year' => (int)$key,
-                'num' => $item->count(),
-                'total' => $total_anio,
-                'beneficios' => $item
-            ];
+        })->map(function ($benefits, $year) use ($filters) {
+            $filteredBenefits = $benefits->filter(function ($benefit) use ($filters) {
+                $filter = $filters->get($benefit['id_programa']);
 
+                return $benefit['monto'] >= $filter['min'] && $benefit['monto'] <= $filter['max'];
+            });
+            $totalByYear = $filteredBenefits->sum('monto');
+
+            return [
+                'year' => (int) $year,
+                'num' => $filteredBenefits->count(),
+                'totalByYear' => $totalByYear,
+                'beneficios' => $filteredBenefits->values(),
+            ];
         })->values();
 
         return BenefitResource::collection($benefitsByYear);
